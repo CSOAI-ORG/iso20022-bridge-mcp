@@ -1,7 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.CSOAI-ORG/iso20022-bridge-mcp",
-  "description": "ISO 20022 / SWIFT finance bridge — parse, validate, modernise, govern (DORA/NIS2/AML).",
+  "description": "ISO 20022 / SWIFT finance bridge \u2014 parse, validate, modernise, govern (DORA/NIS2/AML).",
   "version": "0.1.0",
-  "packages": [{"registry_type": "pypi", "identifier": "iso20022-bridge-mcp", "version": "0.1.0", "transport": {"type": "stdio"}}]
+  "packages": [
+    {
+      "identifier": "iso20022-bridge-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "registryType": "pypi",
+      "runtimeHint": "python"
+    }
+  ]
 }
