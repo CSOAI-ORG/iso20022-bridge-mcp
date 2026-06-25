@@ -16,6 +16,22 @@ import re
 
 mcp = FastMCP("ISO 20022 Bridge", instructions="Bridge ISO 20022 / SWIFT financial messages to ONE OS — parse, validate, modernise, and govern (AML/DORA).")
 
+# ── SIGIL: every governed action → one signed hash-chained hop (SIGIL_LOG unifies all layers) ──
+import hashlib as _hl, time as _t, json as _j, os as _os
+_SIGIL_LOG = _os.environ.get("SIGIL_LOG", _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "bridge_sigil.log"))
+def _sigil(op, body):
+    try:
+        prev = ""
+        if _os.path.exists(_SIGIL_LOG):
+            with open(_SIGIL_LOG) as f:
+                ls = f.readlines()
+                if ls: prev = _j.loads(ls[-1]).get("digest", "")
+        ts = int(_t.time()); dg = _hl.sha256(f"{op}|{ts}|{prev[:8]}|{body}".encode()).hexdigest()[:16]
+        _os.makedirs(_os.path.dirname(_SIGIL_LOG), exist_ok=True)
+        with open(_SIGIL_LOG, "a") as f: f.write(_j.dumps({"ts": ts, "op": op, "body": body, "prev_digest": prev, "digest": dg}) + "\n")
+        return dg
+    except Exception: return ""
+
 # Common ISO 20022 message families (root document element local-names)
 MSG_TYPES = {
     "pacs.008": "FI-to-FI Customer Credit Transfer",
@@ -154,6 +170,7 @@ def map_to_modern(xml: str) -> Dict[str, Any]:
 @mcp.tool()
 def govern_payment(xml: str) -> Governance:
     """Governance pass over a payment: surface AML/sanctions checkpoints + applicable frameworks (attestable for CSOAI)."""
+    _sigil("G", "iso20022|govern_payment")
     p = parse_iso20022(xml)
     flags: List[str] = []
     aml: List[str] = ["Sanctions screening (debtor + creditor + agents)", "PEP check", "Transaction monitoring threshold"]
